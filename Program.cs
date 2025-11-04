@@ -11,19 +11,34 @@
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             // ReportAssemblyのフォルダパス
             var reportFolder = ConfigurationManager.AppSettings["ReportFolder"];
+            if (!Directory.Exists(reportFolder))
+            {
+                throw new FileNotFoundException($"{reportFolder}がみつかりません");
+            }
 
             // hw21plusのフォルダパス
             var webFolder = ConfigurationManager.AppSettings["WebFolder"];
+            if (!Directory.Exists(webFolder))
+            {
+                throw new FileNotFoundException($"{webFolder}がみつかりません");
+            }
+
+            // 結果出力フォルダパス
+            var outFolder = ConfigurationManager.AppSettings["OutputFolder"];
+            if (!Directory.Exists(outFolder))
+            {
+                throw new FileNotFoundException($"{outFolder}がみつかりません");
+            }
 
             // BaseReport派生クラスの抽出結果ファイル
-            var reportOutputPath = ConfigurationManager.AppSettings["ReportOutputPath"];
+            var reportOutputPath = Path.Combine(outFolder, "BaseReportClasses.txt");
 
             // BaseReport派生クラスのインスタンス生成を行っているaspx.csの結果ファイル
-            var usageOutputPath = ConfigurationManager.AppSettings["UsageOutputPath"];
+            var usageOutputPath = Path.Combine(outFolder, "ReportUsageInAspxCs.xml");
 
             var reportClassNames = new List<(string ClassName, string FilePath)>();
 
@@ -80,6 +95,7 @@
 
                 foreach (var (className, _) in reportClassNames)
                 {
+                    // 帳票クラスのインスタンスを生成しているか
                     var found = root.DescendantNodes()
                         .OfType<ObjectCreationExpressionSyntax>()
                         .Any(n => n.Type.ToString().EndsWith(className));
@@ -93,6 +109,7 @@
                         var aspxCandidates = Directory.GetFiles(csFolder, "*.aspx", SearchOption.TopDirectoryOnly);
                         foreach (var aspxFile in aspxCandidates)
                         {
+                            // コードビハインドの正常な紐づけがされているか
                             var aspxContent = File.ReadAllText(aspxFile);
                             if (aspxContent.Contains($"CodeFile=\"{csFileName}\""))
                             {
@@ -105,7 +122,7 @@
                         Console.WriteLine($"使用検出: {className} → {file}");
                         if (matchedAspxPath != null)
                         {
-                            Console.WriteLine($"対応 .aspx ファイル: {matchedAspxPath}");
+                            Console.WriteLine($"対応.aspxファイル: {matchedAspxPath}");
                         }
                     }
                 }
