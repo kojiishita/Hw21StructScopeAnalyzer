@@ -38,7 +38,7 @@
             var reportOutputPath = Path.Combine(outFolder, "BaseReportClasses.txt");
 
             // BaseReport派生クラスのインスタンス生成を行っているaspx.csの結果ファイル
-            var usageOutputPath = Path.Combine(outFolder, "ReportUsageInAspxCs.xml");
+            var usageOutputPath = Path.Combine(outFolder, "ReportUsageInAspxCs.txt");
 
             var reportClassNames = new List<(string ClassName, string FilePath)>();
 
